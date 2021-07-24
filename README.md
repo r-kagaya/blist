@@ -1,16 +1,9 @@
 # blist
 
-book list manage app
+this is simple book list manage app.
+No login required, Keeps data locally only.  
+<b>currently an alpha version and only Android support.</b>
 
-## Getting Started
+## How to Work
+https://user-images.githubusercontent.com/20347995/126865679-ef4a564d-1b80-4f13-894a-fb3df955d9d9.mp4
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
