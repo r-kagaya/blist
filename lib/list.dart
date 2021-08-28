@@ -1,3 +1,4 @@
+import 'package:blist/component/BookListTile.dart';
 import 'package:blist/component/EmptyView.dart';
 import 'package:blist/component/Toaster.dart';
 import 'package:blist/domain/book.dart';
@@ -6,10 +7,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
-import 'book_detail.dart';
 
 class ListPage extends StatefulWidget {
   ListPage({Key key, this.title}) : super(key: key);
@@ -22,7 +22,10 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   final List<Book> listItems = [];
-  var database;
+  final List<Book> unreadItems = [];
+  final List<Book> readedItems = [];
+
+  Database database;
 
   Future fetchBookList() async {
     EasyLoading.show(status: 'loading...');
@@ -52,18 +55,37 @@ class _ListPageState extends State<ListPage> {
           'itemPrice INTEGER, '
           'salesDate TEXT, '
           'largeImageUrl TEXT, '
-          'itemUrl TEXT'
+          'itemUrl TEXT, '
+          'readingStatus INTEGER'
           ')',
         );
       },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        const scripts = {
+          '2': ["ALTER TABLE books ADD COLUMN readingStatus INTEGER DEFAULT 0;"]
+        };
+
+        for (var i = oldVersion + 1; i <= newVersion; i++) {
+          var queries = scripts[i.toString()];
+          for (String query in queries) {
+            await db.execute(query);
+          }
+        }
+      },
       // Set the version. This executes the onCreate function and provides a
       // path to perform database upgrades and downgrades.
-      version: 1,
+      version: 2,
     );
     final List<Map<String, dynamic>> maps = await database.query('books');
+
     listItems.clear();
-    List.generate(maps.length, (i) {
-      listItems.add(Book(
+    unreadItems.clear();
+    readedItems.clear();
+
+    List.generate(
+      maps.length,
+      (i) {
+        final book = Book(
           isbn: maps[i]["isbn"],
           title: maps[i]["title"],
           author: maps[i]["author"],
@@ -74,19 +96,29 @@ class _ListPageState extends State<ListPage> {
           itemPrice: maps[i]["itemPrice"],
           salesDate: maps[i]["salesDate"],
           largeImageUrl: maps[i]["largeImageUrl"],
-          itemUrl: maps[i]["itemUrl"]));
-    });
+          itemUrl: maps[i]["itemUrl"],
+          readingStatus: ReadingStatusExt.of(maps[i]["readingStatus"]),
+        );
+//        print(ReadingStatusExt.of(maps[i]["readingStatus"]));
+//        print(maps[i]);
+//        print(book);
+
+        listItems.add(book);
+        if (book.readingStatus == ReadingStatus.UNREAD) unreadItems.add(book);
+        if (book.readingStatus == ReadingStatus.READED) readedItems.add(book);
+      },
+    );
     listItems.reversed.toList();
+    unreadItems.reversed.toList();
+    readedItems.reversed.toList();
   }
 
   // Define a function that inserts dogs into the database
   Future<void> insertBook(Book book, BuildContext context) async {
-    final db = await database;
-
     if (listItems.where((i) => i.isbn == book.isbn).isNotEmpty) {
       Toaster.show("既に存在しています");
     } else {
-      await db.insert(
+      await database.insert(
         'books',
         book.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -96,53 +128,235 @@ class _ListPageState extends State<ListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: FutureBuilder(
-        future: fetchBookList(),
-        builder: (BuildContext context, snapshot) {
-          return Center(
-            child: listItems.isNotEmpty
-                ? ListView.builder(
-                    itemCount: listItems.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        child: ListTile(
-                          leading: Icon(Icons.book),
-                          minLeadingWidth: 20.0,
-                          title: Text(listItems[index].title),
-                          trailing: IconButton(
-                            icon: Icon(Icons.more_vert),
-                            onPressed: () async {
-                              _showOptionDialog(listItems[index], context);
-                            },
-                          ),
-                          subtitle: Text(listItems[index].author),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BookDetail(
-                                  book: listItems[index],
-                                ),
-                              ),
-                            );
-                          },
-                          isThreeLine: true,
+    Widget Function(int length, int index) spaceContainerBottomOfList =
+        (int length, int i) {
+      if (length == (i + 1)) {
+        return Container(
+          height: 30,
+          color: Colors.transparent,
+        );
+      }
+      return Container();
+    };
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.title,
+          ),
+        ),
+        body: Column(
+          children: [
+            Container(
+              height: 50,
+              color: Colors.white,
+//              decoration: BoxDecoration(
+//                gradient: LinearGradient(
+//                  colors: [
+//                    Colors.white,
+//                    Colors.white,
+//                    Theme.of(context).primaryColor,
+//                    Theme.of(context).primaryColor,
+//                    Colors.purpleAccent,
+//                    Colors.purple
+//                  ],
+//                ),
+//              ),
+              child: TabBar(
+                labelStyle: TextStyle(
+                  color: Colors.black,
+                ),
+                labelColor: Colors.blue,
+                tabs: <Widget>[
+                  Tab(
+                    child: Text(
+                      "All",
+                      style: TextStyle(color: Colors.black, fontSize: 14.0),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      "Unread",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      "Readed",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FutureBuilder(
+              future: fetchBookList(),
+              builder: (BuildContext context, snapshot) {
+                return Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            Center(
+                              child: listItems.isNotEmpty
+                                  ? ListView.builder(
+                                      padding: EdgeInsets.only(
+                                        top: 5,
+                                        bottom: 5,
+                                      ),
+                                      itemCount: listItems.length,
+                                      itemBuilder: (context, index) {
+                                        final bookListTileWidget = BookListTile(
+                                          items: listItems[index],
+                                          trailingIconButton: IconButton(
+                                            icon: Icon(Icons.more_vert),
+                                            onPressed: () async {
+                                              _showOptionDialog(
+                                                listItems[index],
+                                                context,
+                                              );
+                                            },
+                                          ),
+                                        );
+
+                                        return Column(
+                                          children: [
+                                            bookListTileWidget,
+                                            spaceContainerBottomOfList(
+                                                listItems.length, index)
+                                          ],
+                                        );
+                                      },
+                                    )
+                                  : EmptyView(),
+                            ),
+                            Center(
+                              child: unreadItems.isNotEmpty
+                                  ? ListView.builder(
+                                      padding: EdgeInsets.only(
+                                        top: 5,
+                                        bottom: 5,
+                                      ),
+                                      itemCount: unreadItems.length,
+                                      itemBuilder: (context, index) {
+                                        final bookListTileWidget = BookListTile(
+                                          items: unreadItems[index],
+                                          trailingIconButton: IconButton(
+                                            icon: Icon(Icons.more_vert),
+                                            onPressed: () async {
+                                              _showOptionDialog(
+                                                unreadItems[index],
+                                                context,
+                                              );
+                                            },
+                                          ),
+                                        );
+
+                                        return Column(
+                                          children: [
+                                            bookListTileWidget,
+                                            spaceContainerBottomOfList(
+                                                unreadItems.length, index)
+                                          ],
+                                        );
+                                      },
+                                    )
+                                  : EmptyView(),
+                            ),
+                            Center(
+                              child: readedItems.isNotEmpty
+                                  ? ListView.builder(
+                                      padding: EdgeInsets.only(
+                                        top: 5,
+                                        bottom: 5,
+                                      ),
+                                      itemCount: readedItems.length,
+                                      itemBuilder: (context, index) {
+                                        final bookListTileWidget = BookListTile(
+                                          items: readedItems[index],
+                                          trailingIconButton: IconButton(
+                                            icon: Icon(Icons.more_vert),
+                                            onPressed: () async {
+                                              _showOptionDialog(
+                                                readedItems[index],
+                                                context,
+                                              );
+                                            },
+                                          ),
+                                        );
+
+                                        return Column(
+                                          children: [
+                                            bookListTileWidget,
+                                            spaceContainerBottomOfList(
+                                                readedItems.length, index)
+                                          ],
+                                        );
+                                      },
+                                    )
+                                  : EmptyView(),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  )
-                : EmptyView(),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _scanQrCode(context),
-        tooltip: "Add",
-        child: Icon(Icons.add),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _scanQrCode(context),
+          tooltip: "Add",
+          child: Icon(Icons.add),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Theme.of(context).primaryColor,
+          notchMargin: 6.0,
+          shape: AutomaticNotchedShape(
+            RoundedRectangleBorder(),
+            StadiumBorder(
+              side: BorderSide(),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  height: 60.0,
+                ),
+//                IconButton(
+//                  icon: Icon(
+//                    Icons.person_outline,
+//                    color: Colors.white,
+//                  ),
+//                  iconSize: 36.0,
+//                  onPressed: () {},
+//                ),
+//                IconButton(
+//                  icon: Icon(
+//                    Icons.person_outline,
+//                    color: Colors.white,
+//                  ),
+//                  iconSize: 32.0,
+//                  onPressed: () {},
+//                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -176,25 +390,110 @@ class _ListPageState extends State<ListPage> {
   }
 
   _showOptionDialog(Book book, BuildContext context) async {
-    await showDialog<int>(
+    showMaterialModalBottomSheet(
       context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          children: <Widget>[
-            SimpleDialogOption(
-              onPressed: () => {
-                _deleteBook(book.isbn),
-                Navigator.pop(context, 1),
-              },
-              child: const Text(
-                '削除',
-                style: TextStyle(color: Colors.red),
+      builder: (context) => Container(
+        height: 120,
+        child: Column(
+          children: [
+            if (book.readingStatus == ReadingStatus.READED)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: TextButton(
+                    onPressed: () {
+                      print("mark as unreaded");
+                      var values = <String, dynamic>{
+                        "readingStatus": ReadingStatus.UNREAD.value
+                      };
+                      database.update(
+                        'books',
+                        values,
+                        where: "isbn = ?",
+                        whereArgs: [book.isbn],
+                        conflictAlgorithm: ConflictAlgorithm.fail,
+                      );
+                      setState(() {
+                        fetchBookList();
+                      });
+                      Navigator.pop(context, 1);
+                    },
+                    style: TextButton.styleFrom(
+                      primary: Colors.black,
+                    ),
+                    child: const Text(
+                      '未読としてマーク',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (book.readingStatus == ReadingStatus.UNREAD)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: TextButton(
+                    onPressed: () {
+                      print("mark as readed");
+                      var values = <String, dynamic>{
+                        "readingStatus": ReadingStatus.READED.value
+                      };
+                      database.update(
+                        'books',
+                        values,
+                        where: "isbn = ?",
+                        whereArgs: [book.isbn],
+                        conflictAlgorithm: ConflictAlgorithm.fail,
+                      );
+                      setState(() {
+                        fetchBookList();
+                      });
+                      Navigator.pop(context, 1);
+                    },
+                    style: TextButton.styleFrom(
+                      primary: Colors.black,
+                    ),
+                    child: const Text(
+                      '読書済みとしてマーク',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: TextButton(
+                  onPressed: () {
+                    _deleteBook(book.isbn);
+                    Navigator.pop(context, 1);
+                  },
+                  style: TextButton.styleFrom(
+                    primary: Colors.black,
+                  ),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 

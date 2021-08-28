@@ -10,6 +10,7 @@ class Book {
   final String salesDate;
   final String largeImageUrl;
   final String itemUrl;
+  final ReadingStatus readingStatus;
 
   Book({
     this.title,
@@ -23,6 +24,7 @@ class Book {
     this.largeImageUrl,
     this.isbn,
     this.itemUrl,
+    this.readingStatus = ReadingStatus.UNREAD,
   });
 
   Map<String, dynamic> toMap() {
@@ -37,7 +39,8 @@ class Book {
       "salesDate": salesDate,
       "largeImageUrl": largeImageUrl,
       "isbn": isbn,
-      "itemUrl": itemUrl
+      "itemUrl": itemUrl,
+      "readingStatus": readingStatus.value
     };
   }
 
@@ -54,7 +57,50 @@ class Book {
         'itemPrice: $itemPrice, '
         'salesDate: $salesDate, '
         'largeImageUrl: $largeImageUrl, '
-        'itemUrl: $itemUrl'
+        'itemUrl: $itemUrl, '
+        'readingStatus: ${readingStatus.value}'
         '}';
+  }
+
+  ReadingStatus of(int value) {
+    switch (value) {
+      case 0:
+        return ReadingStatus.UNREAD;
+        break;
+      case 1:
+        return ReadingStatus.READED;
+        break;
+    }
+  }
+}
+
+enum ReadingStatus {
+  UNREAD,
+  READED,
+}
+
+extension ReadingStatusExt on ReadingStatus {
+  int get value {
+    switch (this) {
+      case ReadingStatus.UNREAD:
+        return 0;
+        break;
+      case ReadingStatus.READED:
+        return 1;
+        break;
+    }
+  }
+
+  static ReadingStatus of(int value) {
+    switch (value) {
+      case 0:
+        return ReadingStatus.UNREAD;
+        break;
+      case 1:
+        return ReadingStatus.READED;
+        break;
+      default:
+        return ReadingStatus.UNREAD;
+    }
   }
 }

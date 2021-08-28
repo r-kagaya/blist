@@ -2,6 +2,7 @@ import 'package:blist/domain/book.dart';
 import 'package:blist/lib/Isbn.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BookDetail extends StatefulWidget {
@@ -47,31 +48,64 @@ class _BookDetailState extends State<BookDetail> {
             _buildPublisherColumn(),
             _buildOptionRow(),
             Padding(padding: EdgeInsets.only(top: 10)),
-            Padding(
-              padding: EdgeInsets.only(left: 30, right: 30),
-              child: ElevatedButton(
-                child: const Text(
-                  'Open',
-                  style: TextStyle(fontSize: 16),
-                ),
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.blueAccent,
-                  onPrimary: Colors.white,
-                  fixedSize: Size(50, 50),
-                ),
-                onPressed: () {
-                  _showOpenDialog();
-                },
-              ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    child: FaIcon(
+                      FontAwesomeIcons.amazon,
+                      color: Colors.black,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.amberAccent,
+                      onPrimary: Color.fromRGBO(191, 0, 0, 1.0),
+                      shape: const CircleBorder(
+                          side: BorderSide(style: BorderStyle.none)),
+                      fixedSize: Size(65, 65),
+                    ),
+                    onPressed: () {
+                      var url =
+                          "http://www.amazon.co.jp/dp/${Isbn13(isbn: widget.book.isbn.toString()).convertToIsbn10()}";
+                      _launchURL(url);
+                    },
+                  ),
+                  ElevatedButton(
+                    child: FaIcon(
+                      FontAwesomeIcons.yahoo,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white,
+                      onPrimary: Colors.redAccent,
+                      shape: const CircleBorder(
+                          side: BorderSide(style: BorderStyle.none)),
+                      fixedSize: Size(65, 65),
+                    ),
+                    onPressed: () {
+                      _launchURL(
+                          "https://shopping.yahoo.co.jp/search?first=&p=${widget.book.isbn.toString()}");
+                    },
+                  ),
+                  ElevatedButton(
+                    child: const Text(
+                      'R',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white,
+                      onPrimary: Color.fromRGBO(191, 0, 0, 1.0),
+                      shape: const CircleBorder(
+                          side: BorderSide(style: BorderStyle.none)),
+                      fixedSize: Size(65, 65),
+                    ),
+                    onPressed: () {
+                      _launchURL(widget.book.itemUrl);
+                    },
+                  ),
+                ],
             ),
-//            Row(
-//              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//              children: [
-//                _buildToAmazonButton(),
-//                _buildToYahooButton(),
-//                _buildToRakutenButton(),
-//              ],
-//            ),
             Padding(padding: EdgeInsets.only(bottom: 20)),
           ],
         ),
