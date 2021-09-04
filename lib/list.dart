@@ -99,9 +99,6 @@ class _ListPageState extends State<ListPage> {
           itemUrl: maps[i]["itemUrl"],
           readingStatus: ReadingStatusExt.of(maps[i]["readingStatus"]),
         );
-//        print(ReadingStatusExt.of(maps[i]["readingStatus"]));
-//        print(maps[i]);
-//        print(book);
 
         listItems.add(book);
         if (book.readingStatus == ReadingStatus.UNREAD) unreadItems.add(book);
