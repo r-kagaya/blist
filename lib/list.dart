@@ -424,7 +424,7 @@ class _ListPageState extends State<ListPage> {
                       primary: Colors.black,
                     ),
                     child: const Text(
-                      '未読としてマーク',
+                      'Mark as Unread',
                       style: TextStyle(
                         fontSize: 16.0,
                       ),
@@ -460,7 +460,7 @@ class _ListPageState extends State<ListPage> {
                       primary: Colors.black,
                     ),
                     child: const Text(
-                      '読書済みとしてマーク',
+                      'Mark as Readed',
                       style: TextStyle(
                         fontSize: 16.0,
                       ),
