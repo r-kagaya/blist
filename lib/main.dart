@@ -2,6 +2,7 @@ import 'package:blist/list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");
@@ -12,6 +13,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    const locale = Locale("ja", "JP");
+
     return MaterialApp(
       title: 'Blist',
       theme: ThemeData(
@@ -31,6 +34,15 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: "VT323",
       ),
+      locale: locale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        locale,
+      ],
       home: ListPage(title: 'blist'),
       builder: EasyLoading.init(),
     );
