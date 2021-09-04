@@ -49,62 +49,62 @@ class _BookDetailState extends State<BookDetail> {
             _buildOptionRow(),
             Padding(padding: EdgeInsets.only(top: 10)),
             Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    child: FaIcon(
-                      FontAwesomeIcons.amazon,
-                      color: Colors.black,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.amberAccent,
-                      onPrimary: Color.fromRGBO(191, 0, 0, 1.0),
-                      shape: const CircleBorder(
-                          side: BorderSide(style: BorderStyle.none)),
-                      fixedSize: Size(65, 65),
-                    ),
-                    onPressed: () {
-                      var url =
-                          "http://www.amazon.co.jp/dp/${Isbn13(isbn: widget.book.isbn.toString()).convertToIsbn10()}";
-                      _launchURL(url);
-                    },
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  child: FaIcon(
+                    FontAwesomeIcons.amazon,
+                    color: Colors.black,
                   ),
-                  ElevatedButton(
-                    child: FaIcon(
-                      FontAwesomeIcons.yahoo,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.white,
-                      onPrimary: Colors.redAccent,
-                      shape: const CircleBorder(
-                          side: BorderSide(style: BorderStyle.none)),
-                      fixedSize: Size(65, 65),
-                    ),
-                    onPressed: () {
-                      _launchURL(
-                          "https://shopping.yahoo.co.jp/search?first=&p=${widget.book.isbn.toString()}");
-                    },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.amberAccent,
+                    onPrimary: Color.fromRGBO(191, 0, 0, 1.0),
+                    shape: const CircleBorder(
+                        side: BorderSide(style: BorderStyle.none)),
+                    fixedSize: Size(65, 65),
                   ),
-                  ElevatedButton(
-                    child: const Text(
-                      'R',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.white,
-                      onPrimary: Color.fromRGBO(191, 0, 0, 1.0),
-                      shape: const CircleBorder(
-                          side: BorderSide(style: BorderStyle.none)),
-                      fixedSize: Size(65, 65),
-                    ),
-                    onPressed: () {
-                      _launchURL(widget.book.itemUrl);
-                    },
+                  onPressed: () {
+                    var url =
+                        "http://www.amazon.co.jp/dp/${Isbn13(isbn: widget.book.isbn.toString()).convertToIsbn10()}";
+                    _launchURL(url);
+                  },
+                ),
+                ElevatedButton(
+                  child: FaIcon(
+                    FontAwesomeIcons.yahoo,
                   ),
-                ],
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.white,
+                    onPrimary: Colors.redAccent,
+                    shape: const CircleBorder(
+                        side: BorderSide(style: BorderStyle.none)),
+                    fixedSize: Size(65, 65),
+                  ),
+                  onPressed: () {
+                    _launchURL(
+                        "https://shopping.yahoo.co.jp/search?first=&p=${widget.book.isbn.toString()}");
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text(
+                    'R',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.white,
+                    onPrimary: Color.fromRGBO(191, 0, 0, 1.0),
+                    shape: const CircleBorder(
+                        side: BorderSide(style: BorderStyle.none)),
+                    fixedSize: Size(65, 65),
+                  ),
+                  onPressed: () {
+                    _launchURL(widget.book.itemUrl);
+                  },
+                ),
+              ],
             ),
             Padding(padding: EdgeInsets.only(bottom: 20)),
           ],
@@ -257,7 +257,6 @@ class _BookDetailState extends State<BookDetail> {
     final descTextStyle = TextStyle(
       color: Colors.black,
       fontWeight: FontWeight.w900,
-      fontFamily: 'Roboto',
       letterSpacing: 0.5,
       fontSize: 16,
       height: 2,

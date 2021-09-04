@@ -18,10 +18,7 @@ class EmptyView extends StatelessWidget {
           ),
           Text(
             "No book list yet",
-            style: TextStyle(
-              fontSize: 24,
-              fontFamily: "Roboto",
-            ),
+            style: TextStyle(fontSize: 24),
           ),
         ],
       ),
