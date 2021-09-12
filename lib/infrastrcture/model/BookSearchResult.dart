@@ -1,4 +1,4 @@
-import 'package:blist/domain/book.dart';
+import 'package:blist/model/book.dart';
 
 class BookSearchResult {
   final String title;

@@ -1,4 +1,4 @@
-import 'package:blist/list.dart';
+import 'package:blist/screens/list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';

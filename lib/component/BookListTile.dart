@@ -1,5 +1,5 @@
-import 'package:blist/book_detail.dart';
-import 'package:blist/domain/book.dart';
+import 'package:blist/model/book.dart';
+import 'package:blist/screens/book_detail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

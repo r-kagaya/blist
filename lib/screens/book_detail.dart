@@ -1,5 +1,5 @@
-import 'package:blist/domain/book.dart';
 import 'package:blist/lib/Isbn.dart';
+import 'package:blist/model/book.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
